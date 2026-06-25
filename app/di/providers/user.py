@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 
 from aiogram.types import Message, TelegramObject
-from dishka import Provider, provide, Scope
+from dishka import Provider, Scope, provide
 
 from app.domain.user.entities import User
 from app.usecases.user.get_or_create_user import GetOrCreateTgUserUseCase

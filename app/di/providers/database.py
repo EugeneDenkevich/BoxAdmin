@@ -1,6 +1,6 @@
 from collections.abc import AsyncIterator
 
-from dishka import AnyOf, Provider, provide, Scope
+from dishka import AnyOf, Provider, Scope, provide
 from sqlalchemy import make_url
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,

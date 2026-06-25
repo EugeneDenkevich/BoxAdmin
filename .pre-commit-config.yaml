@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: "check-ast" # проверяет, что файлы *.py содержат корректный Python код.
+      - id: "trailing-whitespace" # обрезает лишние пробелы в конце строк.
+      - id: "check-case-conflict" # проверка имён файлов на case конфликты, присущие различным ОС.
+      - id: "end-of-file-fixer" # файлы должны заканчиваться только на перевод корретки.
+      - id: "mixed-line-ending" # окончания строк в файле должны быть одинаковые (LF или CRLF - чего больше, то и будет).
+      - id: "detect-private-key" # в коммите не должно быть private ключа.
+      - id: "check-toml" # проверка синтаксиса toml файлов.
+
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v3.2.0
+    hooks:
+      - id: add-trailing-comma # добавление/удаление запятой в конце, там где это нужно.
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.9
+    hooks:
+      - id: ruff # запуск ruff для проверки и внесения правок.
+        name: Format code with Ruff
+        entry: uv run ruff check --fix
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false
+        args:
+          - "app"
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.17.1
+    hooks:
+      - id: mypy # запуск mypy для проверки типов.
+        name: Validate types with MyPy
+        entry: uv run mypy --config-file ./mypy.ini
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false
+        args:
+          - "app"

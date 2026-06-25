@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, cast
 from uuid import UUID
 
 from app.domain.user.entities import User
@@ -40,7 +40,7 @@ class UserService(BaseService):
 
         updated_user = self._update_by_data(user, data)
 
-        await self.user_repo.update_user(updated_user)
+        await self.user_repo.update_user(cast(User, updated_user))
         await self.uow.commit()
 
         return user

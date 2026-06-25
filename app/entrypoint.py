@@ -4,8 +4,8 @@ from dishka.integrations.aiogram import setup_dishka
 
 from app.bot import get_bot, get_dispatcher
 from app.di.containers import default_providers, get_di_container
-from app.settings import Settings, get_settings
 from app.routers.telegram import start_router
+from app.settings import Settings, get_settings
 
 logger = logging.getLogger(__name__)
 

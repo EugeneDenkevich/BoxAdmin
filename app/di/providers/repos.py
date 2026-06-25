@@ -1,4 +1,4 @@
-from dishka import Provider, WithParents, provide, Scope
+from dishka import Provider, Scope, WithParents, provide
 
 from app.repos.user.repo import UserRepo
 

@@ -1,4 +1,4 @@
-from dishka import Provider, provide_all, Scope
+from dishka import Provider, Scope, provide_all
 
 from app.usecases.user import (
     GetOrCreateTgUserUseCase,

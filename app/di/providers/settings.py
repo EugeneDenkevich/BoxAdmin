@@ -1,4 +1,4 @@
-from dishka import Provider, from_context, Scope
+from dishka import Provider, Scope, from_context
 
 from app.settings import Settings
 

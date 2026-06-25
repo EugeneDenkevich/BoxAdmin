@@ -21,6 +21,6 @@ async def process_start(
 ) -> None:
     await state.clear()
 
-    username = f', *{user.username}*' if user.username else ""
+    username = f", *{user.username}*" if user.username else ""
 
     await message.answer(f"Hello{username}!\nYour telegram id is `{user.tg_id}`!")
