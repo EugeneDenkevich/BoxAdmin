@@ -1,0 +1,22 @@
+[project]
+name = "box-admin-bot"
+version = "0.1.0"
+description = "Telegram bot for administarion of group"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram==3.29.0",
+    "alembic==1.18.4",
+    "asyncpg==0.31.0",
+    "dishka==1.10.1",
+    "pydantic==2.13.4",
+    "pydantic-settings==2.14.2",
+    "sqlalchemy==2.0.51",
+]
+
+[dependency-groups]
+dev = [
+    "mypy==2.1.0",
+    "py-mon==2.3.0",
+    "ruff==0.15.19",
+]

@@ -1,0 +1,57 @@
+version: '3'
+
+output: 'prefixed'
+
+tasks:
+  run:
+    aliases:
+      - r
+    cmds:
+      - >
+        docker compose
+        up
+        --build
+        -d
+        {{.CLI_ARGS}}
+        || exit 0
+    desc: run docker compose
+    interactive: true
+
+  down:
+    aliases:
+      - d
+    cmds:
+      - >
+        docker compose
+        down
+        --remove-orphans
+        {{.CLI_ARGS}}
+        || exit 0
+    desc: stop docker compose
+    interactive: true
+
+  log:
+    aliases:
+      - l
+    cmds:
+      - >
+        docker compose
+        logs
+        -f
+        {{.CLI_ARGS}}
+        || exit 0
+    desc: show services' logs
+    interactive: true
+
+  create-migration:
+    aliases:
+      - cm
+    cmds:
+      - >
+        docker compose
+        exec -it
+        app alembic revision
+        --autogenerate
+        -m {{.CLI_ARGS}} || exit 0
+    desc: run docker-compose
+    interactive: true

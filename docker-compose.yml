@@ -1,0 +1,54 @@
+services:
+  app:
+    build: .
+    env_file:
+      - ".env"
+    entrypoint: /project/scripts/entrypoint.bot.sh
+    restart: always
+    volumes:
+      - .:/project/
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    networks:
+      - box_bot_manager
+
+  migrations:
+    build: .
+    entrypoint: alembic upgrade head
+    networks:
+      - box_bot_manager
+    env_file:
+      - ".env"
+    init: true
+    restart: no
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: always
+    ports:
+      - "14141:5432"
+    environment:
+      POSTGRES_USER: ${APP__DB_USER}
+      POSTGRES_PASSWORD: ${APP__DB_PASS}
+      POSTGRES_DB: ${APP__DB_NAME}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${APP__DB_USER} -d ${APP__DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - box_bot_manager
+
+volumes:
+  postgres-data:
+
+networks:
+  box_bot_manager:
+    name: box_bot_manager
+    driver: bridge
