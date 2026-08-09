@@ -53,8 +53,15 @@ class UserRepo(BaseRepo):
 
         await self.session.execute(query)
 
-    async def get_users(self) -> List[User]:
+    async def get_users(
+        self,
+        is_staff: Optional[bool] = None,
+    ) -> List[User]:
         query = sa.select(UserTable)
+
+        if is_staff is not None:
+            query = query.where(UserTable.is_staff == is_staff)
+
         result = await self.session.execute(query)
 
         return [user_db_to_entity(user) for user in result.scalars()]

@@ -29,6 +29,9 @@ class UserTable(BaseTable):
     is_admin: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
     """Is the user admin"""
 
+    is_staff: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
+    """Is the user staff (receives error/monitoring notifications)"""
+
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=False,

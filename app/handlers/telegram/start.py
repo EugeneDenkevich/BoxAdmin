@@ -12,13 +12,17 @@ logger = logging.getLogger(__name__)
 router = Router(name=__name__)
 
 
-@router.message(CommandStart)
+@router.message(CommandStart())
 @inject
 async def process_start(
     message: Message,
     state: FSMContext,
     user: FromDishka[User],
 ) -> None:
+    raise ValueError("AAAAAAAAaaa")
+    if message.chat.type != "private":
+        return
+
     await state.clear()
 
     username = f", *{user.username}*" if user.username else ""

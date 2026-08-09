@@ -18,8 +18,11 @@ class Settings(BaseConfig):
     """Settings for app"""
 
     dev_mode: bool = False
+    log_level: str = "INFO"
+    timezone: str = "Europe/Moscow"
 
     bot_token: str = ""
+    target_chat: int = 0
 
     db_host: str = "db"
     db_port: int = 5432

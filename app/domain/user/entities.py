@@ -7,3 +7,4 @@ class User(Entity):
     tg_id: Optional[int] = None
     username: Optional[str] = None
     is_admin: bool = False
+    is_staff: bool = False

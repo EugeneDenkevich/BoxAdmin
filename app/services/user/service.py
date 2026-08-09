@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import List, Optional, cast
 from uuid import UUID
 
 from app.domain.user.entities import User
@@ -44,3 +44,6 @@ class UserService(BaseService):
         await self.uow.commit()
 
         return user
+
+    async def get_staff_users(self) -> List[User]:
+        return await self.user_repo.get_users(is_staff=True)
