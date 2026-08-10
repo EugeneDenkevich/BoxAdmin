@@ -4,6 +4,7 @@ from dishka.integrations.aiogram import setup_dishka
 
 from app.bot import get_bot, get_dispatcher
 from app.di.containers import default_providers, get_di_container
+from app.error_reporter import ErrorReporter
 from app.handlers.telegram import start_router
 from app.logger import configure_logging
 from app.middlewaries.aiogram.chat_info import ChatInfoMiddleware
@@ -28,11 +29,13 @@ async def entrypoint() -> None:
         context={Settings: settings},
     )
 
-    dp.update.middleware(ChatInfoMiddleware())
-    dp.update.middleware(ErrorMiddleware(container=container))
+    reporter = ErrorReporter(container=container, bot=bot)
+
+    dp.update.middleware(ChatInfoMiddleware(container=container))
+    dp.update.middleware(ErrorMiddleware(reporter=reporter))
 
     setup_dishka(container=container, router=dp, auto_inject=True)
-    setup_scheduler(settings=settings, bot=bot)
+    setup_scheduler(settings=settings, bot=bot, reporter=reporter)
 
     try:
         await dp.start_polling(bot)

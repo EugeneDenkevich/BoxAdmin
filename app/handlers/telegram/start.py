@@ -19,7 +19,6 @@ async def process_start(
     state: FSMContext,
     user: FromDishka[User],
 ) -> None:
-    raise ValueError("AAAAAAAAaaa")
     if message.chat.type != "private":
         return
 
