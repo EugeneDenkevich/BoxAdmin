@@ -48,7 +48,9 @@ class ErrorMiddleware(BaseMiddleware):
             elif message:
                 trigger_info = f"chat_id={message.chat.id}, message is inaccessible"
             else:
-                trigger_info = "no message context (event had no message/callback_query)"
+                trigger_info = (
+                    "no message context (event had no message/callback_query)"
+                )
 
             await self.reporter.report(error, context=trigger_info)
 

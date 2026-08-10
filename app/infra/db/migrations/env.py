@@ -31,6 +31,7 @@ target_metadata = BaseTable.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+
 def get_url() -> URL:
     """
     Получить строку подключения к БД.

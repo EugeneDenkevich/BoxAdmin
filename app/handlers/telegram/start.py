@@ -1,5 +1,3 @@
-import logging
-
 from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
@@ -8,7 +6,6 @@ from dishka.integrations.aiogram import FromDishka, inject
 
 from app.domain.user.entities import User
 
-logger = logging.getLogger(__name__)
 router = Router(name=__name__)
 
 

@@ -27,15 +27,16 @@ class ChatInfoMiddleware(BaseMiddleware):
 
         if isinstance(message, Message):
             chat = message.chat
-            from_user = message.from_user
+            tg_user = message.from_user
 
             logger.info(
-                "Update from chat [CHAT_ID: {}, TYPE: {}, TITLE: {}] by user [USER_ID: {}, USERNAME: {}]",
+                "Update from chat [CHAT_ID: {}, TYPE: {}, TITLE: {}] "
+                "by user [TG_ID: {}, USERNAME: {}]",
                 chat.id,
                 chat.type,
                 chat.title,
-                from_user.id if from_user else None,
-                from_user.username if from_user else None,
+                tg_user.id if tg_user else None,
+                tg_user.username if tg_user else None,
             )
 
         return await handler(event, data)
