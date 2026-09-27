@@ -1,85 +1,67 @@
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
-import sqlalchemy as sa
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
+from sqlalchemy import URL
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from app.infra.db.base import BaseTable
 from app.infra.db.tables.pool import PoolTable, UserPoolTable
 from app.infra.db.tables.user import UserTable
 from app.repos.user.repo import UserRepo
 
 
 @pytest.mark.asyncio
-async def test_get_nonactive_user_tg_ids_returns_only_eligible_nonvoters() -> None:
-    engine = sa.create_engine("sqlite+pysqlite:///:memory:")
-    BaseTable.metadata.create_all(engine)
+async def test_get_nonactive_user_tg_ids_returns_only_eligible_nonvoters(
+    test_database_url: URL,
+) -> None:
+    engine = create_async_engine(test_database_url)
     now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     inactive_id = uuid4()
     active_id = uuid4()
     recent_id = uuid4()
     pool_ids = [uuid4() for _ in range(12)]
 
-    with Session(engine) as db_session:
-        db_session.add_all(
-            [
-                UserTable(
-                    id=inactive_id,
-                    tg_id=101,
-                    username=None,
-                    is_admin=False,
-                    is_staff=False,
-                    created_at=now,
-                    updated_at=now,
+    try:
+        async with AsyncSession(engine) as session:
+            session.add_all(
+                [
+                    UserTable(
+                        id=user_id,
+                        tg_id=tg_id,
+                        username=None,
+                        is_admin=False,
+                        is_staff=False,
+                        created_at=created_at,
+                        updated_at=created_at,
+                    )
+                    for user_id, tg_id, created_at in (
+                        (inactive_id, 101, now),
+                        (active_id, 202, now),
+                        (recent_id, 303, now + timedelta(days=9)),
+                    )
+                ],
+            )
+            session.add_all(
+                [
+                    PoolTable(
+                        id=pool_id,
+                        telegram_poll_id=f"poll-{index}",
+                        created_at=now + timedelta(days=index + 1),
+                        updated_at=now + timedelta(days=index + 1),
+                    )
+                    for index, pool_id in enumerate(pool_ids)
+                ],
+            )
+            await session.flush()
+            session.add(
+                UserPoolTable(
+                    user_id=active_id,
+                    pool_id=pool_ids[-1],
+                    option_ids=[0],
                 ),
-                UserTable(
-                    id=active_id,
-                    tg_id=202,
-                    username=None,
-                    is_admin=False,
-                    is_staff=False,
-                    created_at=now,
-                    updated_at=now,
-                ),
-                UserTable(
-                    id=recent_id,
-                    tg_id=303,
-                    username=None,
-                    is_admin=False,
-                    is_staff=False,
-                    created_at=now + timedelta(days=9),
-                    updated_at=now + timedelta(days=9),
-                ),
-            ],
-        )
-        db_session.add_all(
-            [
-                PoolTable(
-                    id=pool_id,
-                    telegram_poll_id=f"poll-{index}",
-                    created_at=now + timedelta(days=index + 1),
-                    updated_at=now + timedelta(days=index + 1),
-                )
-                for index, pool_id in enumerate(pool_ids)
-            ],
-        )
-        db_session.add(
-            UserPoolTable(
-                user_id=active_id,
-                pool_id=pool_ids[-1],
-                option_ids=[0],
-            ),
-        )
-        db_session.commit()
+            )
+            await session.flush()
 
-        async_session = AsyncMock(spec=AsyncSession)
-        async_session.execute.side_effect = lambda query: db_session.execute(query)
-        repo = UserRepo(async_session)
-
-        assert await repo.get_nonactive_user_tg_ids() == [101]
-        async_session.execute.assert_awaited_once()
-
-    engine.dispose()
+            assert await UserRepo(session).get_nonactive_user_tg_ids() == [101]
+    finally:
+        await engine.dispose()

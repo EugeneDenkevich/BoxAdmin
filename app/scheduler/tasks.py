@@ -29,12 +29,8 @@ async def send_pool_task(
         await pool_service.save_pool(message.poll.id)
 
 
-async def ban_nonactive_users_task(
-    bot: Bot,
-    chat_id: int,
-    container: AsyncContainer,
-) -> None:
+async def ban_nonactive_users_task(container: AsyncContainer) -> None:
     async with container(scope=Scope.REQUEST) as request_container:
-        use_case = await request_container.get(BanNonactiveUsers)
+        ban_nonactive_users = await request_container.get(BanNonactiveUsers)
 
-        await use_case(bot, chat_id)
+        await ban_nonactive_users()

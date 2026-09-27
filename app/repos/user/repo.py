@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, cast
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -101,11 +101,15 @@ class UserRepo(BaseRepo):
             )
             .where(UserTable.tg_id.is_not(None))
             .group_by(UserTable.id, UserTable.tg_id)
-            .having(sa.func.count(latest_pools.c.pool_id) == required_pools_count)
-            .having(sa.func.count(UserPoolTable.pool_id) == 0)
+            .having(
+                sa.and_(
+                    sa.func.count(latest_pools.c.pool_id) == required_pools_count,
+                    sa.func.count(UserPoolTable.pool_id) == 0,
+                ),
+            )
         )
         # fmt:on
 
         result = await self.session.execute(query)
 
-        return result.scalars().all()
+        return cast(List[int], result.scalars().all())

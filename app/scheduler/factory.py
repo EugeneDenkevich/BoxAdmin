@@ -11,14 +11,17 @@ from app.scheduler.tasks import ban_nonactive_users_task, send_pool_task
 from app.settings import Settings
 
 
+def get_scheduler(settings: Settings) -> AsyncIOScheduler:
+    return AsyncIOScheduler(timezone=settings.timezone)
+
+
 def setup_scheduler(
-    settings: Settings,
+    scheduler: AsyncIOScheduler,
+    target_chat: int,
     bot: Bot,
     reporter: ErrorReporter,
     container: AsyncContainer,
-) -> None:
-    scheduler = AsyncIOScheduler(timezone=settings.timezone)
-
+) -> AsyncIOScheduler:
     def on_job_error(event: JobExecutionEvent) -> None:
         if event.exception is None:
             return
@@ -39,7 +42,7 @@ def setup_scheduler(
         day_of_week="0,2,4",
         kwargs={
             "bot": bot,
-            "chat_id": settings.target_chat,
+            "chat_id": target_chat,
             "container": container,
         },
     )
@@ -49,11 +52,9 @@ def setup_scheduler(
         hours=24,
         next_run_time=datetime.now(scheduler.timezone),
         id="ban_nonactive_users",
-        kwargs={
-            "bot": bot,
-            "chat_id": settings.target_chat,
-            "container": container,
-        },
+        kwargs={"container": container},
     )
 
     scheduler.start()
+
+    return scheduler
