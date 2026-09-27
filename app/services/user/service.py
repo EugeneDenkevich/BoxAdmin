@@ -1,6 +1,8 @@
 from typing import List, Optional, cast
 from uuid import UUID
 
+from aiogram import Bot
+
 from app.domain.user.entities import User
 from app.domain.user.exceptions import UserNotFoundError
 from app.infra.uow import UoW
@@ -47,3 +49,6 @@ class UserService(BaseService):
 
     async def get_staff_users(self) -> List[User]:
         return await self.user_repo.get_users(is_staff=True)
+
+    async def ban_user(self, bot: Bot, chat_id: int, tg_user_id: int) -> None:
+        await bot.ban_chat_member(chat_id=chat_id, user_id=tg_user_id)

@@ -5,6 +5,7 @@ import sqlalchemy as sa
 
 from app.domain.user.entities import User
 from app.domain.user.exceptions import UserNotFoundError
+from app.infra.db.tables.pool import PoolTable, UserPoolTable
 from app.infra.db.tables.user import UserTable
 from app.repos.base import BaseRepo
 from app.repos.user.converters import user_db_to_entity
@@ -65,3 +66,46 @@ class UserRepo(BaseRepo):
         result = await self.session.execute(query)
 
         return [user_db_to_entity(user) for user in result.scalars()]
+
+    async def get_nonactive_user_tg_ids(self) -> List[int]:
+        """
+        Взять id пользователей, которые не учавствовали в необходимом кол-ве
+        подряд идущих пулов (required_pools_count).
+        """
+
+        required_pools_count = 10
+
+        # fmt:off
+        latest_pools = (
+            sa
+            .select(
+                PoolTable.id.label("pool_id"),
+                PoolTable.created_at.label("created_at"),
+            )
+            .order_by(PoolTable.created_at.desc(), PoolTable.id.desc())
+            .limit(required_pools_count)
+            .cte("latest_pools")
+        )
+
+        query = (
+            sa
+            .select(UserTable.tg_id)
+            .select_from(UserTable)
+            .join(latest_pools, latest_pools.c.created_at > UserTable.created_at)
+            .outerjoin(
+                UserPoolTable,
+                sa.and_(
+                    UserPoolTable.user_id == UserTable.id,
+                    UserPoolTable.pool_id == latest_pools.c.pool_id,
+                ),
+            )
+            .where(UserTable.tg_id.is_not(None))
+            .group_by(UserTable.id, UserTable.tg_id)
+            .having(sa.func.count(latest_pools.c.pool_id) == required_pools_count)
+            .having(sa.func.count(UserPoolTable.pool_id) == 0)
+        )
+        # fmt:on
+
+        result = await self.session.execute(query)
+
+        return result.scalars().all()

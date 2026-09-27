@@ -40,7 +40,12 @@ async def entrypoint() -> None:
     dp.update.middleware(CreateUserIfNotExistsMiddleware(container=container))
 
     setup_dishka(container=container, router=dp, auto_inject=True)
-    setup_scheduler(settings=settings, bot=bot, reporter=reporter)
+    setup_scheduler(
+        settings=settings,
+        bot=bot,
+        reporter=reporter,
+        container=container,
+    )
 
     try:
         await dp.start_polling(bot)
