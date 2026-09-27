@@ -1,12 +1,12 @@
 import asyncio
 import os
 import subprocess
-from collections.abc import Generator
+from collections.abc import AsyncIterator, Generator
 from uuid import uuid4
 
 import asyncpg
 import pytest
-from sqlalchemy import URL
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from app.settings import Settings, get_settings
 
@@ -27,8 +27,12 @@ async def run_admin_sql(settings: Settings, sql: str) -> None:
 
 
 @pytest.fixture(scope="session")
-def test_database_url() -> Generator[URL, None, None]:
-    settings = get_settings()
+def settings() -> Generator[Settings, None, None]:
+    yield get_settings()
+
+
+@pytest.fixture(scope="session")
+def init_db_name(settings: Settings) -> Generator[str, None, None]:
     database_name = f"test_app_{uuid4().hex}"
 
     asyncio.run(run_admin_sql(settings, f'CREATE DATABASE "{database_name}"'))
@@ -39,7 +43,7 @@ def test_database_url() -> Generator[URL, None, None]:
 
         subprocess.run(["alembic", "upgrade", "head"], env=environment, check=True)
 
-        yield settings.get_db_url().set(database=database_name)
+        yield database_name
     finally:
         asyncio.run(
             run_admin_sql(
@@ -47,3 +51,14 @@ def test_database_url() -> Generator[URL, None, None]:
                 f'DROP DATABASE IF EXISTS "{database_name}" WITH (FORCE)',
             ),
         )
+
+
+@pytest.fixture
+async def engine(settings: Settings, init_db_name: str) -> AsyncIterator[AsyncEngine]:
+    db_url = settings.get_db_url().set(database=init_db_name)
+    test_engine = create_async_engine(db_url)
+
+    try:
+        yield test_engine
+    finally:
+        await test_engine.dispose()
