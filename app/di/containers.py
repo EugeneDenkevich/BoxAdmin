@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional, Tuple
 from dishka import AsyncContainer, Provider, make_async_container
 from dishka.integrations.aiogram import AiogramProvider
 
+from app.di.providers.bot import TelegramBotProvider
 from app.di.providers.database import DatabaseProvider
 from app.di.providers.repos import ReposProvider
 from app.di.providers.service import ServicesProvider
@@ -14,6 +15,7 @@ from app.di.providers.user import UserProvider
 def default_providers() -> Tuple[Provider, ...]:
     return (
         SettingsProvider(),
+        TelegramBotProvider(),
         DatabaseProvider(),
         ReposProvider(),
         ServicesProvider(),

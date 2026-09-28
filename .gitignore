@@ -11,3 +11,5 @@ wheels/
 
 .env
 assets/
+.vscode/
+.coverage

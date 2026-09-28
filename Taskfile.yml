@@ -55,3 +55,18 @@ tasks:
         -m {{.CLI_ARGS}} || exit 0
     desc: run docker-compose
     interactive: true
+
+  tests:
+    aliases:
+      - t
+    cmds:
+      - >
+        docker compose
+        exec
+        -it
+        app
+        pytest
+        {{.CLI_ARGS}}
+        || exit 0
+    desc: run docker compose
+    interactive: true

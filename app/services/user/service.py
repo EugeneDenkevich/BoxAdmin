@@ -3,16 +3,26 @@ from uuid import UUID
 
 from app.domain.user.entities import User
 from app.domain.user.exceptions import UserNotFoundError
+from app.gateways.telegram_bot.gateway import TelegramBotGateway
 from app.infra.uow import UoW
 from app.repos.user.repo import UserRepo
 from app.services.base import BaseService
 from app.services.user.schemas import UpdateUserData
+from app.settings import Settings
 
 
 class UserService(BaseService):
-    def __init__(self, user_repo: UserRepo, uow: UoW) -> None:
+    def __init__(
+        self,
+        user_repo: UserRepo,
+        uow: UoW,
+        bot_gateway: TelegramBotGateway,
+        settings: Settings,
+    ) -> None:
         self.user_repo = user_repo
         self.uow = uow
+        self.bot_gateway = bot_gateway
+        self.target_chat = settings.target_chat
 
     async def get_or_create_tg_user(
         self,
@@ -47,3 +57,9 @@ class UserService(BaseService):
 
     async def get_staff_users(self) -> List[User]:
         return await self.user_repo.get_users(is_staff=True)
+
+    async def ban_user(self, tg_user_id: int) -> None:
+        await self.bot_gateway.ban_user(self.target_chat, tg_user_id)
+
+    async def get_nonactive_user_tg_ids(self) -> List[int]:
+        return await self.user_repo.get_nonactive_user_tg_ids()
