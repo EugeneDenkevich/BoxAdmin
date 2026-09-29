@@ -9,6 +9,7 @@ def user_db_to_entity(user: UserTable) -> User:
         username=user.username,
         is_admin=user.is_admin,
         is_staff=user.is_staff,
+        is_banned=user.is_banned,
         created_at=user.created_at,
         updated_at=user.updated_at,
     )

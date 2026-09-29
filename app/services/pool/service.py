@@ -1,7 +1,6 @@
 from typing import List
 from uuid import UUID
 
-from app.domain.pool.exceptions import PoolIdsNotProvidedError
 from app.infra.uow import UoW
 from app.repos.pool.repo import PoolRepo
 
@@ -21,9 +20,6 @@ class PoolService:
         user_id: UUID,
         option_ids: List[int],
     ) -> None:
-        if not option_ids:
-            raise PoolIdsNotProvidedError()
-
         pool = await self.pool_repo.get_pool(telegram_poll_id)
 
         await self.pool_repo.save_vote(pool.id, user_id, option_ids)

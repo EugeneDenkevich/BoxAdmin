@@ -8,3 +8,4 @@ class User(Entity):
     username: Optional[str] = None
     is_admin: bool = False
     is_staff: bool = False
+    is_banned: bool = False
