@@ -60,3 +60,37 @@ async def test_get_nonactive_user_tg_ids_returns_only_eligible_nonvoters(
         await session.flush()
 
         assert await UserRepo(session).get_nonactive_user_tg_ids() == [101]
+
+
+@pytest.mark.asyncio
+async def test_update_user_persists_ban_status_and_updated_at(
+    engine: AsyncEngine,
+) -> None:
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    user_id = uuid4()
+
+    async with AsyncSession(engine) as session:
+        session.add(
+            UserTable(
+                id=user_id,
+                tg_id=404,
+                username=None,
+                is_admin=False,
+                is_staff=False,
+                is_banned=False,
+                created_at=now,
+                updated_at=now,
+            ),
+        )
+        await session.flush()
+        repo = UserRepo(session)
+        user = await repo.get_user_by_tg_id_or_none(404)
+        assert user is not None
+
+        await repo.update_user(user.model_copy(update={"is_banned": True}))
+        await session.commit()
+
+        updated_user = await repo.get_user_by_tg_id_or_none(404)
+        assert updated_user is not None
+        assert updated_user.is_banned is True
+        assert updated_user.updated_at > now

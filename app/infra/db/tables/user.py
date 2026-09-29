@@ -21,7 +21,7 @@ class UserTable(BaseTable):
         nullable=True,
         unique=True,
     )
-    """Telegram ID of current user"""
+    """Telegram ID of the current user"""
 
     username: Mapped[Optional[str]] = mapped_column(sa.String(512), nullable=True)
     """Telegram username"""
@@ -31,6 +31,9 @@ class UserTable(BaseTable):
 
     is_staff: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
     """Is the user staff (receives error/monitoring notifications)"""
+
+    is_banned: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
+    """Is the user banned in the target chat"""
 
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True),

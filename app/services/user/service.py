@@ -1,6 +1,8 @@
 from typing import List, Optional, cast
 from uuid import UUID
 
+from loguru import logger
+
 from app.domain.user.entities import User
 from app.domain.user.exceptions import UserNotFoundError
 from app.gateways.telegram_bot.gateway import TelegramBotGateway
@@ -23,6 +25,17 @@ class UserService(BaseService):
         self.uow = uow
         self.bot_gateway = bot_gateway
         self.target_chat = settings.target_chat
+
+    async def get_user_by_tg_id(
+        self,
+        tg_id: int,
+    ) -> User:
+        user = await self.user_repo.get_user_by_tg_id_or_none(tg_id)
+
+        if user is None:
+            raise UserNotFoundError()
+
+        return user
 
     async def get_or_create_tg_user(
         self,
@@ -48,7 +61,7 @@ class UserService(BaseService):
         if user is None:
             raise UserNotFoundError()
 
-        updated_user = self._update_by_data(user, data)
+        updated_user = self._update(user, data)
 
         await self.user_repo.update_user(cast(User, updated_user))
         await self.uow.commit()
@@ -58,8 +71,19 @@ class UserService(BaseService):
     async def get_staff_users(self) -> List[User]:
         return await self.user_repo.get_users(is_staff=True)
 
-    async def ban_user(self, tg_user_id: int) -> None:
-        await self.bot_gateway.ban_user(self.target_chat, tg_user_id)
+    async def ban_user(self, tg_id: int) -> None:
+        user = await self.get_user_by_tg_id(tg_id)
+
+        if user.is_admin or user.is_staff or user.is_banned:
+            logger.info("User is admin, staff or already banned, skip banning")
+
+            return
+
+        await self.bot_gateway.ban_user(self.target_chat, tg_id)
+
+        banned_user = user.model_copy(update={"is_banned": True})
+        await self.user_repo.update_user(banned_user)
+        await self.uow.commit()
 
     async def get_nonactive_user_tg_ids(self) -> List[int]:
         return await self.user_repo.get_nonactive_user_tg_ids()

@@ -49,7 +49,10 @@ class UserRepo(BaseRepo):
         query = (
             sa.update(UserTable)
             .where(UserTable.id == user.id)
-            .values(**user.model_dump(exclude={"id"}))
+            .values(
+                **user.model_dump(exclude={"id", "updated_at"}),
+                updated_at=sa.func.now(),
+            )
         )
 
         await self.session.execute(query)

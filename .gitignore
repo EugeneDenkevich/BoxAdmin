@@ -13,3 +13,4 @@ wheels/
 assets/
 .vscode/
 .coverage
+.local/
