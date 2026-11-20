@@ -2,7 +2,7 @@ from typing import Any, Awaitable, Callable, Dict, Optional, Union
 
 from aiogram import BaseMiddleware
 from aiogram.types import (
-    InaccessibleMessage,
+    CallbackQuery,
     Message,
     PollAnswer,
     TelegramObject,
@@ -34,15 +34,18 @@ class CreateUserIfNotExistsMiddleware(BaseMiddleware):
         :return: The result of the handler function if successful.
         """
 
-        tg_event: Optional[Union[Message, InaccessibleMessage, PollAnswer]] = (
-            event.callback_query.message if event.callback_query else event.message
+        tg_event: Optional[Union[Message, CallbackQuery, PollAnswer]] = (
+            event.callback_query if event.callback_query else event.message
         )
         if tg_event is None:
             tg_event = event.poll_answer
 
-        should_create_user = (isinstance(tg_event, Message) and tg_event.from_user) or (
-            isinstance(tg_event, PollAnswer) and tg_event.user
-        )
+        # fmt: off
+        should_create_user = (
+            isinstance(tg_event, (Message, CallbackQuery))
+            and tg_event.from_user
+        ) or (isinstance(tg_event, PollAnswer) and tg_event.user)
+        # fmt: on
 
         if should_create_user:
             async with self.container(

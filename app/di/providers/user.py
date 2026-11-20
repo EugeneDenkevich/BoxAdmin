@@ -1,6 +1,6 @@
 from typing import AsyncGenerator, Optional
 
-from aiogram.types import Message, PollAnswer, TelegramObject
+from aiogram.types import CallbackQuery, Message, PollAnswer, TelegramObject
 from dishka import Provider, Scope, provide
 
 from app.domain.user.entities import User
@@ -20,6 +20,9 @@ class UserProvider(Provider):
         username: Optional[str] = None
 
         if isinstance(tg_event, Message) and tg_event.from_user:
+            tg_id = tg_event.from_user.id
+            username = tg_event.from_user.username
+        elif isinstance(tg_event, CallbackQuery):
             tg_id = tg_event.from_user.id
             username = tg_event.from_user.username
         elif isinstance(tg_event, PollAnswer) and tg_event.user:

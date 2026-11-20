@@ -2,7 +2,7 @@ from aiogram import Bot
 from dishka import AsyncContainer, Scope
 
 from app.services.pool.service import PoolService
-from app.usecases.user.ban_nonactive_users import BanNonactiveUsers
+from app.usecases.user.notify_nonactive_users import NotifyNonactiveUsersUseCasse
 
 
 async def send_pool_task(
@@ -29,8 +29,8 @@ async def send_pool_task(
         await pool_service.save_pool(message.poll.id)
 
 
-async def ban_nonactive_users_task(container: AsyncContainer) -> None:
+async def notify_nonactive_users_task(container: AsyncContainer) -> None:
     async with container(scope=Scope.REQUEST) as request_container:
-        ban_nonactive_users = await request_container.get(BanNonactiveUsers)
+        notify_nonactive_users = await request_container.get(NotifyNonactiveUsersUseCasse)
 
-        await ban_nonactive_users()
+        await notify_nonactive_users()
