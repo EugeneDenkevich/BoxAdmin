@@ -1,4 +1,4 @@
-from typing import List, Optional, cast
+from typing import List, Optional, Tuple
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -9,6 +9,7 @@ from app.infra.db.tables.pool import PoolTable, UserPoolTable
 from app.infra.db.tables.user import UserTable
 from app.repos.base import BaseRepo
 from app.repos.user.converters import user_db_to_entity
+from app.schemas import NonactiveUserCandidate
 
 
 class UserRepo(BaseRepo):
@@ -70,7 +71,25 @@ class UserRepo(BaseRepo):
 
         return [user_db_to_entity(user) for user in result.scalars()]
 
-    async def get_nonactive_user_tg_ids(self) -> List[int]:
+    async def get_nonactive_users(self) -> List[NonactiveUserCandidate]:
+        query = self._get_nonactive_users_query()
+        result = await self.session.execute(query)
+
+        return [
+            NonactiveUserCandidate.model_validate(row)
+            for row in result.mappings().all()
+        ]
+
+    async def is_nonactive_user(self, tg_id: int) -> bool:
+        query = self._get_nonactive_users_query(tg_id=tg_id).limit(1)
+        result = await self.session.execute(query)
+
+        return result.first() is not None
+
+    def _get_nonactive_users_query(
+        self,
+        tg_id: Optional[int] = None,
+    ) -> sa.Select[Tuple[UUID, Optional[int], Optional[str], int]]:
         """
         Взять id пользователей, которые не учавствовали в необходимом кол-ве
         подряд идущих пулов (required_pools_count).
@@ -92,7 +111,12 @@ class UserRepo(BaseRepo):
 
         query = (
             sa
-            .select(UserTable.tg_id)
+            .select(
+                UserTable.id.label("user_id"),
+                UserTable.tg_id,
+                UserTable.username,
+                sa.func.count(latest_pools.c.pool_id).label("missed_pools_count"),
+            )
             .select_from(UserTable)
             .join(latest_pools, latest_pools.c.created_at > UserTable.created_at)
             .outerjoin(
@@ -102,8 +126,13 @@ class UserRepo(BaseRepo):
                     UserPoolTable.pool_id == latest_pools.c.pool_id,
                 ),
             )
-            .where(UserTable.tg_id.is_not(None))
-            .group_by(UserTable.id, UserTable.tg_id)
+            .where(
+                UserTable.tg_id.is_not(None),
+                UserTable.is_admin.is_(False),
+                UserTable.is_staff.is_(False),
+                UserTable.is_banned.is_(False),
+            )
+            .group_by(UserTable.id, UserTable.tg_id, UserTable.username)
             .having(
                 sa.and_(
                     sa.func.count(latest_pools.c.pool_id) == required_pools_count,
@@ -113,6 +142,7 @@ class UserRepo(BaseRepo):
         )
         # fmt:on
 
-        result = await self.session.execute(query)
+        if tg_id is not None:
+            query = query.where(UserTable.tg_id == tg_id)
 
-        return cast(List[int], result.scalars().all())
+        return query

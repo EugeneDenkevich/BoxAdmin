@@ -21,13 +21,15 @@ class ChatInfoMiddleware(BaseMiddleware):
         :return: The result of the handler function if successful.
         """
 
-        message = (
-            event.callback_query.message if event.callback_query else event.message
-        )
+        message = event.callback_query.message if event.callback_query else event.message
 
         if isinstance(message, Message):
             chat = message.chat
-            tg_user = message.from_user
+            tg_user = (
+                event.callback_query.from_user
+                if event.callback_query
+                else message.from_user
+            )
 
             logger.info(
                 "Update from chat [CHAT_ID: {}, TYPE: {}, TITLE: {}] "

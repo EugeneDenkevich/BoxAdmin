@@ -1,9 +1,9 @@
 from dishka import Provider, Scope, provide_all
 
 from app.usecases.user import (
-    BanNonactiveUsers,
     GetOrCreateTgUserUseCase,
     GetUserOrNoneUseCase,
+    NotifyNonactiveUsersUseCasse,
     UpdateUserUseCase,
 )
 
@@ -13,6 +13,6 @@ class UseCaseProvider(Provider):
         GetUserOrNoneUseCase,
         GetOrCreateTgUserUseCase,
         UpdateUserUseCase,
-        BanNonactiveUsers,
+        NotifyNonactiveUsersUseCasse,
         scope=Scope.REQUEST,
     )

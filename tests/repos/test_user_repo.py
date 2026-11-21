@@ -10,13 +10,16 @@ from app.repos.user.repo import UserRepo
 
 
 @pytest.mark.asyncio
-async def test_get_nonactive_user_tg_ids_returns_only_eligible_nonvoters(
+async def test_get_nonactive_users_returns_only_eligible_nonvoters(
     engine: AsyncEngine,
 ) -> None:
     now = datetime(2026, 1, 1, tzinfo=timezone.utc)
     inactive_id = uuid4()
     active_id = uuid4()
     recent_id = uuid4()
+    admin_id = uuid4()
+    staff_id = uuid4()
+    banned_id = uuid4()
     pool_ids = [uuid4() for _ in range(12)]
 
     async with AsyncSession(engine) as session:
@@ -26,15 +29,19 @@ async def test_get_nonactive_user_tg_ids_returns_only_eligible_nonvoters(
                     id=user_id,
                     tg_id=tg_id,
                     username=None,
-                    is_admin=False,
-                    is_staff=False,
+                    is_admin=is_admin,
+                    is_staff=is_staff,
+                    is_banned=is_banned,
                     created_at=created_at,
                     updated_at=created_at,
                 )
-                for user_id, tg_id, created_at in (
-                    (inactive_id, 101, now),
-                    (active_id, 202, now),
-                    (recent_id, 303, now + timedelta(days=9)),
+                for user_id, tg_id, created_at, is_admin, is_staff, is_banned in (
+                    (inactive_id, 101, now, False, False, False),
+                    (active_id, 202, now, False, False, False),
+                    (recent_id, 303, now + timedelta(days=9), False, False, False),
+                    (admin_id, 404, now, True, False, False),
+                    (staff_id, 505, now, False, True, False),
+                    (banned_id, 606, now, False, False, True),
                 )
             ],
         )
@@ -59,7 +66,15 @@ async def test_get_nonactive_user_tg_ids_returns_only_eligible_nonvoters(
         )
         await session.flush()
 
-        assert await UserRepo(session).get_nonactive_user_tg_ids() == [101]
+        repo = UserRepo(session)
+        candidates = await repo.get_nonactive_users()
+
+        assert len(candidates) == 1
+        assert candidates[0].user_id == inactive_id
+        assert candidates[0].tg_id == 101
+        assert candidates[0].missed_pools_count == 10
+        assert await repo.is_nonactive_user(101) is True
+        assert await repo.is_nonactive_user(202) is False
 
 
 @pytest.mark.asyncio
