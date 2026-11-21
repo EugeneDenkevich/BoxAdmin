@@ -9,8 +9,8 @@ from app.domain.user.exceptions import UserNotFoundError
 from app.gateways.telegram_bot.gateway import TelegramBotGateway
 from app.infra.uow import UoW
 from app.repos.user.repo import UserRepo
+from app.schemas import NonactiveUserCandidate
 from app.services.base import BaseService
-from app.services.schemas import NonactiveUserCandidate
 from app.services.user.schemas import UpdateUserData
 from app.settings import Settings
 

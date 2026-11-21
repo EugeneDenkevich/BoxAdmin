@@ -9,7 +9,7 @@ from app.infra.db.tables.pool import PoolTable, UserPoolTable
 from app.infra.db.tables.user import UserTable
 from app.repos.base import BaseRepo
 from app.repos.user.converters import user_db_to_entity
-from app.services.schemas import NonactiveUserCandidate
+from app.schemas import NonactiveUserCandidate
 
 
 class UserRepo(BaseRepo):

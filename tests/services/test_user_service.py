@@ -10,7 +10,7 @@ from app.domain.user.entities import User
 from app.gateways.telegram_bot.gateway import TelegramBotGateway
 from app.infra.bot.client import TelegramBotClient
 from app.repos.user.repo import UserRepo
-from app.services.schemas import NonactiveUserCandidate
+from app.schemas import NonactiveUserCandidate
 from app.services.user.service import UserService
 from app.settings import Settings
 
