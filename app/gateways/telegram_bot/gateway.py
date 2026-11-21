@@ -1,6 +1,5 @@
-from typing import Any
-
 from app.infra.bot.client import TelegramBotClient
+from app.schemas import InlineKeyboardMarkupSchema
 
 
 class TelegramBotGateway:
@@ -17,7 +16,7 @@ class TelegramBotGateway:
         self,
         chat_id: int,
         text: str,
-        reply_markup: Any,
+        reply_markup: InlineKeyboardMarkupSchema,
     ) -> None:
         await self.tg_bot_client.send_message(
             chat_id=chat_id,

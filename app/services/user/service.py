@@ -1,7 +1,6 @@
 from typing import List, Optional, cast
 from uuid import UUID
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from loguru import logger
 
 from app.domain.user.entities import User
@@ -9,7 +8,11 @@ from app.domain.user.exceptions import UserNotFoundError
 from app.gateways.telegram_bot.gateway import TelegramBotGateway
 from app.infra.uow import UoW
 from app.repos.user.repo import UserRepo
-from app.schemas import NonactiveUserCandidate
+from app.schemas import (
+    InlineKeyboardButtonSchema,
+    InlineKeyboardMarkupSchema,
+    NonactiveUserCandidate,
+)
 from app.services.base import BaseService
 from app.services.user.schemas import UpdateUserData
 from app.settings import Settings
@@ -130,10 +133,10 @@ class UserService(BaseService):
             f"Пропустил {nonactive_user.missed_pools_count} пулов подряд. Баним?"
         )
 
-        keyboard = InlineKeyboardMarkup(
+        keyboard = InlineKeyboardMarkupSchema(
             inline_keyboard=[
                 [
-                    InlineKeyboardButton(
+                    InlineKeyboardButtonSchema(
                         text="Забанить",
                         callback_data=f"nonactive_ban:{nonactive_user.tg_id}",
                     ),

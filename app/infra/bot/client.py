@@ -1,5 +1,7 @@
 from aiogram import Bot
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from app.schemas import InlineKeyboardMarkupSchema
 
 
 class TelegramBotClient:
@@ -13,10 +15,23 @@ class TelegramBotClient:
         self,
         chat_id: int,
         text: str,
-        reply_markup: InlineKeyboardMarkup,
+        reply_markup: InlineKeyboardMarkupSchema,
     ) -> None:
+        markup = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text=button.text,
+                        callback_data=button.callback_data,
+                    )
+                    for button in row
+                ]
+                for row in reply_markup.inline_keyboard
+            ],
+        )
+
         await self.bot.send_message(
             chat_id=chat_id,
             text=text,
-            reply_markup=reply_markup,
+            reply_markup=markup,
         )
