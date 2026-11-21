@@ -28,6 +28,7 @@ async def process_start(
         instructions = [
             "*Команды:*",
             "`/start` — показать ваш Telegram ID.",
+            "`/statistic` — график посещаемости по голосованиям.",
         ]
 
         if user.is_staff:
@@ -39,8 +40,7 @@ async def process_start(
 
         if user.is_admin:
             admin_instruction = (
-                "*Admin:* отдельных команд нет; аккаунт "
-                "защищён от бана."
+                "*Admin:* аккаунт защищён от бана."
             )
 
             if not user.is_staff:

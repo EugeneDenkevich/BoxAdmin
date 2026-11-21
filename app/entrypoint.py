@@ -3,10 +3,15 @@ import logging
 from aiogram import Bot
 from dishka.integrations.aiogram import setup_dishka
 
-from app.bot import get_dispatcher
+from app.bot import get_dispatcher, setup_bot_menu
 from app.di.containers import default_providers, get_di_container
 from app.error_reporter import ErrorReporter
-from app.handlers.telegram import nonactive_user_router, pool_router, start_router
+from app.handlers.telegram import (
+    nonactive_user_router,
+    pool_router,
+    start_router,
+    statistic_router,
+)
 from app.logger import configure_logging
 from app.middlewaries.aiogram.chat_info import ChatInfoMiddleware
 from app.middlewaries.aiogram.create_user_if_not_exists import (
@@ -33,11 +38,13 @@ async def entrypoint() -> None:
 
     try:
         bot = await container.get(Bot)
+        await setup_bot_menu(bot)
         dp = get_dispatcher()
 
         dp.include_router(start_router)
         dp.include_router(pool_router)
         dp.include_router(nonactive_user_router)
+        dp.include_router(statistic_router)
 
         reporter = ErrorReporter(container=container, bot=bot)
 

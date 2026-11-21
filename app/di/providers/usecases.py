@@ -1,5 +1,6 @@
 from dishka import Provider, Scope, provide_all
 
+from app.usecases.statistic import GetStatisticUseCase
 from app.usecases.user import (
     GetOrCreateTgUserUseCase,
     GetUserOrNoneUseCase,
@@ -14,5 +15,6 @@ class UseCaseProvider(Provider):
         GetOrCreateTgUserUseCase,
         UpdateUserUseCase,
         NotifyNonactiveUsersUseCasse,
+        GetStatisticUseCase,
         scope=Scope.REQUEST,
     )

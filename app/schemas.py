@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -18,3 +19,9 @@ class InlineKeyboardButtonSchema(BaseModel):
 
 class InlineKeyboardMarkupSchema(BaseModel):
     inline_keyboard: list[list[InlineKeyboardButtonSchema]]
+
+
+class PoolAttendanceVote(BaseModel):
+    pool_id: UUID
+    created_at: datetime
+    option_ids: Optional[List[int]] = None

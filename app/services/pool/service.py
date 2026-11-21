@@ -3,6 +3,7 @@ from uuid import UUID
 
 from app.infra.uow import UoW
 from app.repos.pool.repo import PoolRepo
+from app.schemas import PoolAttendanceVote
 
 
 class PoolService:
@@ -24,3 +25,6 @@ class PoolService:
 
         await self.pool_repo.save_vote(pool.id, user_id, option_ids)
         await self.uow.commit()
+
+    async def get_attendance_votes(self) -> List[PoolAttendanceVote]:
+        return await self.pool_repo.get_attendance_votes()

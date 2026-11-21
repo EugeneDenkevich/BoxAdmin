@@ -9,6 +9,7 @@ from app.domain.pool.exceptions import PoolNotFoundError
 from app.infra.db.tables.pool import PoolTable, UserPoolTable
 from app.repos.base import BaseRepo
 from app.repos.pool.converters import pool_db_to_entity
+from app.schemas import PoolAttendanceVote
 
 
 class PoolRepo(BaseRepo):
@@ -62,3 +63,24 @@ class PoolRepo(BaseRepo):
         # fmt: on
 
         await self.session.execute(stmt)
+
+    async def get_attendance_votes(self) -> List[PoolAttendanceVote]:
+        query = (
+            sa.select(
+                PoolTable.id.label("pool_id"),
+                PoolTable.created_at,
+                UserPoolTable.option_ids,
+            )
+            .select_from(PoolTable)
+            .outerjoin(UserPoolTable, UserPoolTable.pool_id == PoolTable.id)
+            .order_by(PoolTable.created_at, PoolTable.id)
+        )
+
+        result = await self.session.execute(query)
+
+        # fmt: off
+        return [
+            PoolAttendanceVote.model_validate(row)
+            for row in result.mappings().all()
+        ]
+        # fmt: on

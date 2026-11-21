@@ -5,6 +5,7 @@ from dishka.integrations.aiogram import AiogramProvider
 
 from app.di.providers.bot import TelegramBotProvider
 from app.di.providers.database import DatabaseProvider
+from app.di.providers.processors import ProcessorProvider
 from app.di.providers.repos import ReposProvider
 from app.di.providers.service import ServicesProvider
 from app.di.providers.settings import SettingsProvider
@@ -17,6 +18,7 @@ def default_providers() -> Tuple[Provider, ...]:
         SettingsProvider(),
         TelegramBotProvider(),
         DatabaseProvider(),
+        ProcessorProvider(),
         ReposProvider(),
         ServicesProvider(),
         UseCaseProvider(),
