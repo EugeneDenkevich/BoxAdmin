@@ -1,9 +1,12 @@
-from aiogram import Router
+from aiogram import Bot, Router
+from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from dishka.integrations.aiogram import FromDishka, inject
+from loguru import logger
 
+from app.bot import setup_user_commands
 from app.domain.user.entities import User
 
 router = Router(name=__name__)
@@ -14,12 +17,22 @@ router = Router(name=__name__)
 async def process_start(
     message: Message,
     state: FSMContext,
+    bot: FromDishka[Bot],
     user: FromDishka[User],
 ) -> None:
     if message.chat.type != "private":
         return
 
     await state.clear()
+
+    try:
+        await setup_user_commands(
+            bot,
+            message.chat.id,
+            is_staff_or_admin=user.is_staff or user.is_admin,
+        )
+    except TelegramAPIError:
+        logger.exception("Failed to update command menu for user {}", user.tg_id)
 
     username = f", *{user.username}*" if user.username else ""
     response = f"Hello{username}!\nYour telegram id is `{user.tg_id}`!"
