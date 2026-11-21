@@ -26,6 +26,9 @@ class UserTable(BaseTable):
     username: Mapped[Optional[str]] = mapped_column(sa.String(512), nullable=True)
     """Telegram username"""
 
+    comment: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
+    """Comment about the user"""
+
     is_admin: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
     """Is the user admin"""
 

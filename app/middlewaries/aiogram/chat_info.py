@@ -32,10 +32,12 @@ class ChatInfoMiddleware(BaseMiddleware):
             )
 
             logger.info(
-                "Update from chat [CHAT_ID: {}, TYPE: {}, TITLE: {}] "
+                "Update from chat "
+                "[CHAT_ID: {}, CHAT_TYPE: {}, MESSAGE_TYPE: {}, TITLE: {}] "
                 "by user [TG_ID: {}, USERNAME: {}]",
                 chat.id,
                 chat.type,
+                message.content_type,
                 chat.title,
                 tg_user.id if tg_user else None,
                 tg_user.username if tg_user else None,

@@ -8,4 +8,5 @@ class UpdateUserData(BaseModel):
     user_id: UUID
     tg_id: Optional[int] = None
     username: Optional[str] = None
+    comment: Optional[str] = None
     is_admin: Optional[bool] = None
